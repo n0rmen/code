@@ -1,0 +1,51 @@
+AuthUserFile "E:\www\github\htaccess\.htpasswd"
+AuthGroupFile "E:\www\github\htaccess\.htgroup"
+AuthName Private
+AuthType Basic
+
+# Disable the directory's index
+Options -Indexes
+
+<limit GET POST>
+	Order deny,allow
+	Deny from all
+	
+	# Allows access to local connections
+	#Allow from localhost
+	
+	# Allows access to user "admin"
+	#require user admin
+	
+	# Allows access to users in group "users"
+	#require group users
+	
+	# Allows access to registered users
+	#require valid-user
+	
+	# Allows access to anonymous connections
+	Allow from all
+	
+	satisfy any
+</Limit>
+
+# Protect ht files
+<FilesMatch "^.ht">
+	Order allow,deny
+	Deny from all
+</FilesMatch>
+
+# Allows access to users in group "users"
+<FilesMatch private.html>
+	Order allow,deny
+	Deny from all
+	require group users
+	satisfy any
+</FilesMatch>
+
+# Allows access to users in group "administrators"
+<FilesMatch admin.html>
+	Order allow,deny
+	Deny from all
+	require group administrators
+	satisfy any
+</FilesMatch>
