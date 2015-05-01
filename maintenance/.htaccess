@@ -1,0 +1,7 @@
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	
+	# Redirect requests to file maintenance.html (except requests from 88.160.137.252)
+	#RewriteCond %{REMOTE_ADDR} !88.160.137.252
+	RewriteRule ^(.*) maintenance.html
+</IfModule>
