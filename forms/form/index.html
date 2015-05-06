@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+	<title>Form</title>
+	<meta charset="utf-8">
+	<style type="text/css">
+		input.invalid,select.invalid,textarea.invalid,input:invalid,select:invalid,textarea:invalid { border: 1px solid red; }
+		.message { margin:5px 0; padding:5px 10px; }
+		.message.success { background-color:lightgreen; color:green; }
+		.message.error { background-color:pink; color:maroon; }
+	</style>
+</head>
+<body>
+<form id="myform" method="post" action="form.php" enctype="multipart/form-data">
+	<input type="hidden" name="validation" value="1">
+	<input type="text" id="myform-name" name="name" placeholder="Name..."><br>
+	<input type="password" id="myform-password" name="password" placeholder="Password..."><br>
+	<input type="date" id="myform-date" name="date" placeholder="Date..."><br>
+	<input type="email" id="myform-email" name="email" placeholder="Email..."><br>
+	<input type="checkbox" id="myform-enabled" name="enabled"> <label for="myform-enabled">Enabled</label><br>
+	<input type="radio" id="myform-version-1" name="version" value="1.0" checked="checked"> <label for="myform-version-1">Version 1.0</label>
+	<input type="radio" id="myform-version-2" name="version" value="2.0"> <label for="myform-version-2">Version 2.0</label><br>
+	<select id="myform-driver" name="driver"><option>777</option><option>888</option></select><br>
+	<textarea id="myform-text" name="text" placeholder="Texte..."></textarea><br>
+	<input type="file" id="myform-file1" name="file1"><br>
+	<button type="submit">Envoyer</button>
+	<div id="myform-message"></div>
+	<div id="myform-result"></div>
+</form>
+
+<script type="text/javascript" src="//modernizr.com/downloads/modernizr-2.6.2.js"></script>
+<script type="text/javascript" src="//code.jquery.com/jquery-2.1.3.min.js"></script>
+<script type="text/javascript" src="submitform.js"></script>
+<script type="text/javascript">
+
+$(function(){
+	$('#myform').submit(function(e){
+		submitForm(e, function(response){
+			if(response.success){
+				$('#myform-message').append("<p class=\"message success\">" + response.message + "</p>");
+				$('#myform-result').append("<p class=\"result\"><pre class=\"result\">" + JSON.stringify(response.result, null, "    ") + "</pre></p>");
+				e.target.reset();
+			}
+			else{
+				if(response.message) $('#myform-message').append("<p class=\"message error\">" + response.message + "</p>");
+				if(response.error) $('#myform-message').append("<p class=\"message error\">" + response.error.message + "</p>");
+				if(response.errors){
+					for(var i in response.errors){
+						$('#myform-message').append("<p class=\"message error\">" + response.errors[i].message + "</p>");
+					}
+				}
+			}
+		});
+	});
+});
+</script>
+</body>
+</html>

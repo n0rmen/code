@@ -1,0 +1,28 @@
+<script src="//modernizr.com/downloads/modernizr-2.6.2.js"></script>
+<script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
+<script src="submitform.js"></script>
+
+<form id="contact-form" class="customform contactform" action="contact.php" method="post">
+	<input type="hidden" name="contact" value="1">
+	<label for="contact-name">Nom</label><input id="contact-name" type="text" name="name" required><br>
+	<label for="contact-email">Email</label><input id="contact-email" type="email" name="email" required><br>
+	<label for="contact-subject">Objet</label><input id="contact-subject" type="text" name="subject" required><br>
+	<label for="contact-text">Message</label><textarea id="contact-text" name="text" required></textarea><br>
+	<button type="submit">Envoyer</button>
+	<div id="contact-form-message"></div>
+</form>
+<script type="text/javascript">
+$(function() {
+	$('#contact-form').submit(function(e){
+		submitForm(e, function(response){
+			if(response.success){
+				$('#contact-form-message').html("<p class=\"message success\">" + response.message + "</p>");
+				e.target.reset();
+			}
+			else{
+				$('#contact-form-message').html("<p class=\"message error\">" + response.message + "</p>");
+			}
+		});
+	});
+});
+</script>
