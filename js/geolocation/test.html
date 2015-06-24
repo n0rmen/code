@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Test</title>
+</head>
+<body>
+	<script src="geolocation.js"></script>
+	<script>
+		Geolocation.getCurrentPosition(function(pos){
+			console.log(pos.coords);
+			Geolocation.getCurrentPosition(function(pos){
+				console.log(pos.coords);
+			});
+			
+			Geolocation.getCurrentLocale(function(locale){
+				console.log(locale);
+				Geolocation.getCurrentLocale(function(locale){
+					console.log(locale);
+				});
+			});
+		});
+	</script>
+</body>
+</html>
