@@ -1,5 +1,5 @@
 <?php
-include "youtube.api.php";
+include "youtube.class.php";
 
 $yt = new Youtube(array('api_key' => "YOUR_API_KEY"));
 
