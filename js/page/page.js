@@ -1,44 +1,41 @@
 /**
  * @file page.js
  * @author Cyril Vermande - madislak [at] yahoo.fr
- * @copyright All right reserved 2014 Cyril Vermande
+ * @copyright All right reserved 2015 Cyril Vermande
  *
- * Page management
+ * Page micro framework
 */
 var Page = {
-	mainTitle: "",
-	title: function(title){
-		if(title) document.title = title + " | " + Page.mainTitle;
-		else document.title = Page.mainTitle;
-		return Page;
+	pageTitle: "Page.js",
+	setTitle: function(title){
+		if(title) document.title = title + " | " + this.pageTitle;
+		else document.title = this.pageTitle;
+		return this;
 	},
-	url: function(url, title){
+	setUrl: function(url, title){
 		url = url || "";
-		title = title || "Le Son du coin";
+		title = title || Page.pageTitle;
 		if(window.history.pushState) window.history.pushState(null, title , url);
 		else window.location.hash = "#" + url;
-		return Page;
+		return this;
 	},
-	content: function(html){
+	setContent: function(html){
 		if(html) document.getElementById('page-content').innerHTML = html;
-		return Page;
+		return this;
 	},
-	message: function(message){
-		return Page;
-	},
-	error: function(message){
-		return Page;
+	sendNotification: function(nofitication){
+		return this;
 	},
 	showLoading: function(){
 		document.getElementById('loading').style.display = "block";
-		return Page;
+		return this;
 	},
 	hideLoading: function(){
 		document.getElementById('loading').style.display = "none";
-		return Page;
+		return this;
 	},
 	scrollTo: function(pos){
 		window.scrollTo(0, pos);
-		return Page;
+		return this;
 	}
 }
