@@ -1,0 +1,13 @@
+{
+    "name": "madislak/code",
+	"description": "Code samples and tests",
+	"homepage": "https://github.com/madislak/code",
+	"license": "MIT",
+	"authors": [
+        {
+            "name": "Cyril Vermande",
+            "email": "cyril@cyrilwebdesign.com",
+            "homepage": "http://www.cyrilwebdesign.com"
+        }
+	]
+}

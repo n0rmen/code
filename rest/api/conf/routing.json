@@ -1,0 +1,27 @@
+[
+    {
+        "methods": "GET",
+        "pattern": "user\\\/?$",
+        "controller": "UserController::listAction"
+    },
+    {
+        "methods": "POST",
+        "pattern": "user\\\/?$",
+        "controller": "UserController::createAction"
+    },
+    {
+        "methods": "GET",
+        "pattern": "user\\\/([0-9]+)\\\/?$",
+        "controller": "UserController::readAction"
+    },
+    {
+        "methods": "PUT",
+        "pattern": "user\\\/([0-9]+)\\\/?$",
+        "controller": "UserController::updateAction"
+    },
+    {
+        "methods": "DELETE",
+        "pattern": "user\\\/([0-9]+)\\\/?$",
+        "controller": "UserController::deleteAction"
+    }
+]
