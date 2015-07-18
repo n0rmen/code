@@ -23,6 +23,8 @@ class Youtube{
 	 * Constructor
 	 *
 	 * @param array $params	API parameters : api_key
+	 *
+	 * @throw Exception
 	 */
 	function __construct($params=array()){
 		if(empty($params['api_key'])) throw Exception("Missing API key");
@@ -37,16 +39,17 @@ class Youtube{
 	 * @param array $options Array of options
 	 * 
 	 * @return object
+	 * @throw Exception
 	 */
 	public function getVideo($uri, $options=array()){
 		if(filter_var($uri, FILTER_VALIDATE_URL)) $uri = $this->getVideoIdFromUrl($uri);
 		
-		$params = array('id' => $uri, 'part' => 'id, snippet');
+		$params = array('id' => $uri, 'part' => "id, snippet");
 		if(isset($options['part'])) $params['part'] = $options['part'];
 		
 		$result = $this->get("https://www.googleapis.com/youtube/v3/videos", $params);
 		
-		if($result->pageInfo->totalResults === 0) return null;
+		if($result->pageInfo->totalResults === 0) throw new Exception("Resource not found");
 		return $result->items[0];
 	}
 	
@@ -61,38 +64,12 @@ class Youtube{
 	 */
 	public function searchVideos($q, $options=array()){
 		$params = array('type' => "video");
+		if(isset($options['part'])) $params['part'] = $options['part'];
+		if(isset($options['maxResults'])) $params['maxResults'] = $options['maxResults'];
 		
 		$result = $this->search($q, $params);
 		
 		return $result;
-	}
-	
-	/**
-	 * GET a Youtube video ID from a URL
-	 * 
-	 * @param string $url The resource URL
-	 * 
-	 * @return string|null
-	 */
-	private function getVideoIdFromUrl($url) {
-		if(!filter_var($url, FILTER_VALIDATE_URL)) return null;
-		
-		$parse_url = parse_url($url);
-		$path = $parse_url['path'];
-		if(strpos($url, 'youtube.com')){
-			if(strpos($url, 'embed')){
-				return substr($path, 7);
-			}
-			else{
-				$query = $parse_url['query'];
-				parse_str($query, $params);
-				return $params['v'];
-			}
-		}
-		else if(strpos($url, 'youtu.be')){
-			return substr($path, 1);
-		}
-		return null;
 	}
 	
 	/**
@@ -103,14 +80,15 @@ class Youtube{
 	 * @param array $options Array of options
 	 * 
 	 * @return object
+	 * @throw Exception
 	 */
 	public function getPlaylist($uri, $options=array()){
-		$params = array('id' => $uri, 'part' => 'id, snippet');
+		$params = array('id' => $uri, 'part' => 'id, snippet, contentDetails, player');
 		if(isset($options['part'])) $params['part'] = $options['part'];
 		
 		$result = $this->get("https://www.googleapis.com/youtube/v3/playlists", $params);
 		
-		if($result->pageInfo->totalResults === 0) return null;
+		if($result->pageInfo->totalResults === 0) throw new Exception("Resource not found");
 		return $result->items[0];
 	}
 	
@@ -124,15 +102,15 @@ class Youtube{
 	 * 
 	 * @return object[]
 	 */
-	public function getPlaylistItems($uri, $pageToken=false, $options=array()){
-		$params = array('playlistId' => $uri, 'part' => 'id, snippet');
+	public function getPlaylistVideos($uri, $pageToken=false, $options=array()){
+		$params = array('playlistId' => $uri, 'part' => "id, snippet");
 		if(isset($options['part'])) $params['part'] = $options['part'];
 		if(isset($options['maxResults'])) $params['maxResults'] = $options['maxResults'];
 		if(is_string($pageToken)) $params['pageToken'] = $pageToken;
 		
 		$result = $this->get("https://www.googleapis.com/youtube/v3/playlistItems", $params);
 		
-		return $result;
+		return $result->items;
 	}
 	
 	/**
@@ -146,6 +124,8 @@ class Youtube{
 	 */
 	public function searchPlaylists($q, $options=array()){
 		$params = array('type' => "playlist");
+		if(isset($options['part'])) $params['part'] = $options['part'];
+		if(isset($options['maxResults'])) $params['maxResults'] = $options['maxResults'];
 		
 		$result = $this->search($q, $options);
 		
@@ -160,15 +140,63 @@ class Youtube{
 	 * @param array $options Array of options
 	 * 
 	 * @return object
+	 * @throw Exception
 	 */
-	public function getChannel($id, $options=array()){
-		$params = array('id' => $id, 'part' => 'id, snippet');
+	public function getChannel($uri, $options=array()){
+		if(filter_var($uri, FILTER_VALIDATE_URL)) $uri = $this->getChannelIdFromUrl($uri);
+		
+		$params = array('id' => $uri, 'part' => "id, snippet");
 		if(isset($options['part'])) $params['part'] = $options['part'];
 		
 		$result = $this->get("https://www.googleapis.com/youtube/v3/channels", $params);
 		
-		if($result->pageInfo->totalResults === 0) return null;
+		if($result->pageInfo->totalResults === 0) throw new Exception("Resource not found");
 		return $result->items[0];
+	}
+	
+	/**
+	 * Get the playlists of a Youtube channel
+	 * @link https://developers.google.com/youtube/v3/docs/playlists
+	 * 
+	 * @param mixed $uri URI of the resource
+	 * @param string $pageToken Token of the page
+	 * @param array $options Array of options
+	 * 
+	 * @return object[]
+	 */
+	public function getChannelPlaylists($uri, $pageToken=false, $options=array()){
+		if(filter_var($uri, FILTER_VALIDATE_URL)) $uri = $this->getChannelIdFromUrl($uri);
+		
+		$params = array('channelId' => $uri, 'part' => "id, snippet");
+		if(isset($options['part'])) $params['part'] = $options['part'];
+		if(isset($options['maxResults'])) $params['maxResults'] = $options['maxResults'];
+		if(is_string($pageToken)) $params['pageToken'] = $pageToken;
+		
+		$result = $this->get("https://www.googleapis.com/youtube/v3/playlists", $params);
+		
+		return $result->items;
+	}
+	
+	/**
+	 * Get the videos of a Youtube channel
+	 * @link https://developers.google.com/youtube/v3/docs/videos
+	 * 
+	 * @param mixed $uri URI of the resource
+	 * @param string $pageToken Token of the page
+	 * @param array $options Array of options
+	 * 
+	 * @return object[]
+	 */
+	public function getChannelVideos($uri, $pageToken=false, $options=array()){
+		if(filter_var($uri, FILTER_VALIDATE_URL)) $uri = $this->getChannelIdFromUrl($uri);
+		
+		$params = array('type' => "video", 'part' => "id, snippet", 'channelId' => $uri);
+		if(isset($options['part'])) $params['part'] = $options['part'];
+		if(isset($options['maxResults'])) $params['maxResults'] = $options['maxResults'];
+		
+		$result = $this->get("https://www.googleapis.com/youtube/v3/search", $params);
+		
+		return $result->items;
 	}
 	
 	/**
@@ -182,6 +210,8 @@ class Youtube{
 	 */
 	public function searchChannels($q, $options=array()){
 		$params = array('type' => "channel");
+		if(isset($options['part'])) $params['part'] = $options['part'];
+		if(isset($options['maxResults'])) $params['maxResults'] = $options['maxResults'];
 		
 		$result = $this->search($q, $params);
 		
@@ -198,7 +228,7 @@ class Youtube{
 	 * @return object[]
 	 */
 	public function search($q, $options=array()){
-		$params = array('q' => $q, 'part' => 'id, snippet');
+		$params = array('q' => $q, 'part' => "id, snippet");
 		if(isset($options['part'])) $params['part'] = $options['part'];
 		if(isset($options['type'])) $params['type'] = $options['type'];
 		if(isset($options['maxResults'])) $params['maxResults'] = $options['maxResults'];
@@ -209,12 +239,81 @@ class Youtube{
 	}
 	
 	/**
+	 * GET a Youtube video ID from a URL
+	 * 
+	 * @param string $url The resource URL
+	 * 
+	 * @return string
+	 * @throw Exception
+	 */
+	private function getVideoIdFromUrl($url){
+		if(!filter_var($url, FILTER_VALIDATE_URL)) throw new Exception("Invalid parameter (URL required)");
+		
+		$parse_url = parse_url($url);
+		$path = $parse_url['path'];
+		if(strpos($url, "youtube.com")){
+			if(strpos($url, "embed")){
+				return substr($path, 7);
+			}
+			else{
+				$query = $parse_url['query'];
+				parse_str($query, $params);
+				return $params['v'];
+			}
+		}
+		else if(strpos($url, "youtu.be")){
+			return substr($path, 1);
+		}
+		
+		throw new Exception("Invalid parameter (Youtube video URL required)");
+	}
+	
+	/**
+	 * GET a Youtube playlist ID from a URL
+	 * 
+	 * @param string $url The resource URL
+	 * 
+	 * @return string
+	 * @throw Exception
+	 */
+	private function getPlaylistIdFromUrl($url){
+		throw new Exception("NOT IMPLEMENTED YET");
+		if(!filter_var($url, FILTER_VALIDATE_URL)) throw new Exception("Invalid parameter (URL required)");
+		
+		$parse_url = parse_url($url);
+		
+		throw new Exception("Invalid parameter (Youtube playlist URL required)");
+	}
+	
+	/**
+	 * GET a Youtube channel ID from a URL
+	 * 
+	 * @param string $url The resource URL
+	 * 
+	 * @return string
+	 * @throw Exception
+	 */
+	private function getChannelIdFromUrl($url){
+		if(!filter_var($url, FILTER_VALIDATE_URL)) throw new Exception("Invalid parameter (URL required)");
+		
+		$parse_url = parse_url($url);
+		$host = $parse_url['host'];
+		$path = $parse_url['path'];
+		if(strpos($url, "youtube.com") && preg_match("/^\/channel/", $path)){
+			return substr($path, 9);
+		}
+		
+		throw new Exception("Invalid parameter (Youtube channel URL required)");
+	}
+	
+	/**
 	 * GET request
 	 * 
 	 * @param string $url The resource URL
 	 * @param array $params Array of parameters
 	 * 
 	 * @return object Decoded JSON response
+	 * @throw Exception
 	 */
 	private function get($url, $params=array()){
 		$params['key'] = $this->api_key;
@@ -237,6 +336,7 @@ class Youtube{
 	 * @param array $params Array of parameters
 	 * 
 	 * @return object Decoded JSON response
+	 * @throw Exception
 	 */
 	private function post($url, $params=array()){
 		$params['key'] = $this->api_key;
@@ -261,6 +361,7 @@ class Youtube{
 	 * @param array $header The request header
 	 * 
 	 * @return string JSON response
+	 * @throw Exception
 	 */
 	private function _curl($url, $method='GET', $params=array(), $header=array('Content-Type: application/x-www-form-urlencoded')){
 		$c = curl_init();
