@@ -23,6 +23,8 @@ class Soundcloud{
 	 * Constructor
 	 *
 	 * @param array $params	API parameters : api_key
+	 *
+	 * @throw Exception
 	 */
 	function __construct($params=array()){
 		if(empty($params['client_id'])) throw Exception("Missing client ID");
@@ -37,6 +39,7 @@ class Soundcloud{
 	 * @param array $options Array of options
 	 * 
 	 * @return object
+	 * @throw Exception
 	 */
 	public function getTrack($uri, $options=array()){
 		if(filter_var($uri, FILTER_VALIDATE_URL)){
@@ -46,7 +49,7 @@ class Soundcloud{
 			$result = $this->get("https://api.soundcloud.com/tracks/".$uri);
 		}
 		
-		if(empty($result->kind) || $result->kind !== "track") return null;
+		if(empty($result->kind) || $result->kind !== "track") throw new Exception("Resource not found");
 		return $result;
 	}
 	
@@ -75,6 +78,7 @@ class Soundcloud{
 	 * @param array $options Array of options
 	 * 
 	 * @return object
+	 * @throw Exception
 	 */
 	public function getPlaylist($uri, $options=array()){
 		if(filter_var($uri, FILTER_VALIDATE_URL)){
@@ -84,7 +88,7 @@ class Soundcloud{
 			$result = $this->get("https://api.soundcloud.com/playlists/".$uri);
 		}
 		
-		if(empty($result->kind) || $result->kind !== "playlist") return null;
+		if(empty($result->kind) || $result->kind !== "playlist") throw new Exception("Resource not found");
 		return $result;
 	}
 	
@@ -128,6 +132,7 @@ class Soundcloud{
 	 * @param array $options Array of options
 	 * 
 	 * @return object
+	 * @throw Exception
 	 */
 	public function getUser($uri, $options=array()){
 		if(filter_var($uri, FILTER_VALIDATE_URL)){
@@ -137,9 +142,7 @@ class Soundcloud{
 			$result = $this->get("https://api.soundcloud.com/users/".$uri);
 		}
 		
-		if(empty($result->kind) || $result->kind !== "user") return null;
-		return $result;
-		
+		if(empty($result->kind) || $result->kind !== "user") throw new Exception("Resource not found");
 		return $result;
 	}
 	
@@ -151,11 +154,12 @@ class Soundcloud{
 	 * @param array $options Array of options
 	 * 
 	 * @return object[]
+	 * @throw Exception
 	 */
 	public function getUserPlaylists($uri, $options=array()){
 		if(filter_var($uri, FILTER_VALIDATE_URL)){
 			$result = $this->get("https://api.soundcloud.com/resolve", array('url' => $uri));
-			if(empty($result->kind) || $result->kind !== "user") return null;
+			if(empty($result->kind) || $result->kind !== "user") throw new Exception("Resource not found");
 			$uri = $result->id;
 		}
 		
@@ -172,11 +176,12 @@ class Soundcloud{
 	 * @param array $options Array of options
 	 * 
 	 * @return object[]
+	 * @throw Exception
 	 */
 	public function getUserTracks($uri, $options=array()){
 		if(filter_var($uri, FILTER_VALIDATE_URL)){
 			$result = $this->get("https://api.soundcloud.com/resolve", array('url' => $uri));
-			if(empty($result->kind) || $result->kind !== "user") return null;
+			if(empty($result->kind) || $result->kind !== "user") throw new Exception("Resource not found");
 			$uri = $result->id;
 		}
 		
@@ -209,6 +214,7 @@ class Soundcloud{
 	 * @param array $params Array of parameters
 	 * 
 	 * @return object Decoded JSON response
+	 * @throw Exception
 	 */
 	private function get($url, $params=array()){
 		$params['client_id'] = $this->api_key;
@@ -227,6 +233,7 @@ class Soundcloud{
 	 * @param array $params Array of parameters
 	 * 
 	 * @return object Decoded JSON response
+	 * @throw Exception
 	 */
 	private function post($url, $params=array()){
 		$params['client_id'] = $this->api_key;
@@ -247,6 +254,7 @@ class Soundcloud{
 	 * @param array $header The request header
 	 * 
 	 * @return string JSON response
+	 * @throw Exception
 	 */
 	private function _curl($url, $method='GET', $params=array(), $header=array('Content-Type: application/x-www-form-urlencoded')){
 		$c = curl_init();
