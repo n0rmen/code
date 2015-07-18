@@ -23,11 +23,12 @@ class Itunes{
 	 * @param array $options Array of options
 	 * 
 	 * @return object
+	 * @throw Exception
 	 */
 	public function getTrack($uri, $options=array()){
 		$result = $this->get("https://itunes.apple.com/lookup", array('id' => $uri));
 		
-		if($result->resultCount === 0 || $result->results[0]->wrapperType !== "track") return null;
+		if($result->resultCount === 0 || $result->results[0]->wrapperType !== "track") throw new Exception("Resource not found");
 		return $result->results[0];
 	}
 	
@@ -56,13 +57,14 @@ class Itunes{
 	 * @param array $options Array of options
 	 * 
 	 * @return object
+	 * @throw Exception
 	 */
 	public function getAlbum($uri, $options=array()){
 		if(filter_var($uri, FILTER_VALIDATE_URL)) $uri = $this->getAlbumIdFromUrl($uri);
 		
 		$result = $this->get("https://itunes.apple.com/lookup", array('id' => $uri));
 		
-		if($result->resultCount === 0 || $result->results[0]->wrapperType !== "collection") return null;
+		if($result->resultCount === 0 || $result->results[0]->wrapperType !== "collection") throw new Exception("Resource not found");
 		return $result->results[0];
 	}
 	
@@ -74,6 +76,7 @@ class Itunes{
 	 * @param array $options Array of options
 	 * 
 	 * @return object[]
+	 * @throw Exception
 	 */
 	public function getAlbumTracks($uri, $options=array()){
 		if(filter_var($uri, FILTER_VALIDATE_URL)) $uri = $this->getAlbumIdFromUrl($uri);
@@ -82,7 +85,7 @@ class Itunes{
 		$result = $this->get("https://itunes.apple.com/lookup", $params);
 		
 		array_shift($result->results);
-		if($result->resultCount === 0 || $result->results[0]->wrapperType !== "track") return null;
+		if($result->resultCount === 0 || $result->results[0]->wrapperType !== "track") throw new Exception("Resource not found");
 		return $result->results;
 	}
 	
@@ -104,7 +107,7 @@ class Itunes{
 	}
 	
 	/**
-	 * GET an iTunes album ID from a URL
+	 * Get an iTunes album ID from a URL
 	 * 
 	 * @param string $url The resource URL
 	 * 
@@ -130,13 +133,14 @@ class Itunes{
 	 * @param array $options Array of options
 	 * 
 	 * @return object
+	 * @throw Exception
 	 */
 	public function getArtist($uri, $options=array()){
 		if(filter_var($uri, FILTER_VALIDATE_URL)) $uri = $this->getArtistIdFromUrl($uri);
 		
 		$result = $this->get("https://itunes.apple.com/lookup", array('id' => $uri));
 		
-		if($result->resultCount === 0 || $result->results[0]->wrapperType !== "artist") return null;
+		if($result->resultCount === 0 || $result->results[0]->wrapperType !== "artist") throw new Exception("Resource not found");
 		return $result->results[0];
 	}
 	
@@ -148,6 +152,7 @@ class Itunes{
 	 * @param array $options Array of options
 	 * 
 	 * @return object[]
+	 * @throw Exception
 	 */
 	public function getArtistAlbums($uri, $options=array()){
 		if(filter_var($uri, FILTER_VALIDATE_URL)) $uri = $this->getArtistIdFromUrl($uri);
@@ -156,7 +161,7 @@ class Itunes{
 		$result = $this->get("https://itunes.apple.com/lookup", $params);
 		
 		array_shift($result->results);
-		if($result->resultCount === 0 || $result->results[0]->wrapperType !== "collection") return null;
+		if($result->resultCount === 0 || $result->results[0]->wrapperType !== "collection") throw new Exception("Resource not found");
 		return $result->results;
 	}
 	
@@ -203,6 +208,7 @@ class Itunes{
 	 * @param array $params Array of parameters
 	 * 
 	 * @return object Decoded JSON response
+	 * @throw Exception
 	 */
 	private function get($url, $params=array()){
 		$url .= (strpos($url, "?") === false ? "?" : "&").http_build_query($params);
@@ -220,6 +226,7 @@ class Itunes{
 	 * @param array $params Array of parameters
 	 * 
 	 * @return object Decoded JSON response
+	 * @throw Exception
 	 */
 	private function post($url, $params=array()){
 		$url .= (strpos($url, "?") === false ? "?" : "&")."client_id=".$this->api_key;
@@ -239,6 +246,7 @@ class Itunes{
 	 * @param array $header The request header
 	 * 
 	 * @return string JSON response
+	 * @throw Exception
 	 */
 	private function _curl($url, $method='GET', $params=array(), $header=array('Content-Type: application/x-www-form-urlencoded')){
 		$c = curl_init();
