@@ -46,7 +46,7 @@ class Soundcloud{
 			$result = $this->get("https://api.soundcloud.com/tracks/".$uri);
 		}
 		
-		if($result->kind !== "track") return null;
+		if(empty($result->kind) || $result->kind !== "track") return null;
 		return $result;
 	}
 	
@@ -84,7 +84,7 @@ class Soundcloud{
 			$result = $this->get("https://api.soundcloud.com/playlists/".$uri);
 		}
 		
-		if($result->kind !== "playlist") return null;
+		if(empty($result->kind) || $result->kind !== "playlist") return null;
 		return $result;
 	}
 	
@@ -97,7 +97,7 @@ class Soundcloud{
 	 * 
 	 * @return object[]
 	 */
-	public function getPlaylistItems($uri, $options=array()){
+	public function getPlaylistTracks($uri, $options=array()){
 		$result = $this->getPlaylist($uri)->tracks;
 		
 		return $result;
@@ -137,8 +137,50 @@ class Soundcloud{
 			$result = $this->get("https://api.soundcloud.com/users/".$uri);
 		}
 		
-		if($result->kind !== "user") return null;
+		if(empty($result->kind) || $result->kind !== "user") return null;
 		return $result;
+		
+		return $result;
+	}
+	
+	/**
+	 * Get the playlists of a Soundcloud user
+	 * @link https://developers.soundcloud.com/docs/api/reference#users
+	 * 
+	 * @param mixed $uri URI of the resource
+	 * @param array $options Array of options
+	 * 
+	 * @return object[]
+	 */
+	public function getUserPlaylists($uri, $options=array()){
+		if(filter_var($uri, FILTER_VALIDATE_URL)){
+			$result = $this->get("https://api.soundcloud.com/resolve", array('url' => $uri));
+			if(empty($result->kind) || $result->kind !== "user") return null;
+			$uri = $result->id;
+		}
+		
+		$result = $this->get("https://api.soundcloud.com/users/".$uri."/playlists");
+		
+		return $result;
+	}
+	
+	/**
+	 * Get the tracks of a Soundcloud user
+	 * @link https://developers.soundcloud.com/docs/api/reference#users
+	 * 
+	 * @param mixed $uri URI of the resource
+	 * @param array $options Array of options
+	 * 
+	 * @return object[]
+	 */
+	public function getUserTracks($uri, $options=array()){
+		if(filter_var($uri, FILTER_VALIDATE_URL)){
+			$result = $this->get("https://api.soundcloud.com/resolve", array('url' => $uri));
+			if(empty($result->kind) || $result->kind !== "user") return null;
+			$uri = $result->id;
+		}
+		
+		$result = $this->get("https://api.soundcloud.com/users/".$uri."/tracks");
 		
 		return $result;
 	}
