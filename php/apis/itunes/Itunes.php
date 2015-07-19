@@ -16,6 +16,35 @@
 class Itunes{
 	
 	/**
+	 * Resolve a Youtube URL
+	 * @link https://developers.google.com/youtube/v3/docs
+	 * 
+	 * @param string $url URL of the resource
+	 * 
+	 * @return object
+	 * @throw Exception
+	 */
+	public function resolve($url){
+		if(!filter_var($url, FILTER_VALIDATE_URL) || strpos($url, "itunes.apple.com") === false) throw new Exception("Invalid parameter (iTunes URL required)");
+		
+		$path = parse_url($url, PHP_URL_PATH);
+		$matches = array();
+		if(preg_match("/^\/[a-z]{2}\/artist\/[a-z\-]*\/id([0-9]*)/", $path, $matches)){
+			$resourceId = $matches[1];
+			$result = $this->getArtist($resourceId);
+		}
+		else if(preg_match("/^\/[a-z]{2}\/album\/[a-z\-]*\/id([0-9]*)/", $path, $matches)){
+			$resourceId = $matches[1];
+			$result = $this->getAlbum($resourceId);
+		}
+		else{
+			throw new Exception("Invalid parameter (iTunes URL required)");
+		}
+		
+		return $result;
+	}
+	
+	/**
 	 * Get an iTunes track
 	 * @link https://www.apple.com/itunes/affiliates/resources/documentation/itunes-store-web-service-search-api.html#lookup
 	 * 
@@ -107,25 +136,6 @@ class Itunes{
 	}
 	
 	/**
-	 * Get an iTunes album ID from a URL
-	 * 
-	 * @param string $url The resource URL
-	 * 
-	 * @return string|null
-	 */
-	public function getAlbumIdFromUrl($url){
-		if(!filter_var($url, FILTER_VALIDATE_URL)) return null;
-		if(!preg_match("/itunes.apple.com\/[a-z]{2}\/album\//", $url)) return null;
-		
-		$path = parse_url($url, PHP_URL_PATH);
-		$matches = array();
-		if(preg_match("/\/[a-z]{2}\/album\/[a-z\-]*\/id([0-9]*)/", $path, $matches)){
-			if(isset($matches[1])) return $matches[1];
-		}
-		return null;
-	}
-	
-	/**
 	 * Get a iTunes artist
 	 * @link https://www.apple.com/itunes/affiliates/resources/documentation/itunes-store-web-service-search-api.html#lookup
 	 * 
@@ -183,6 +193,26 @@ class Itunes{
 	}
 	
 	/**
+	 * Get an iTunes album ID from a URL
+	 * 
+	 * @param string $url The resource URL
+	 * 
+	 * @return string|null
+	 */
+	private function getAlbumIdFromUrl($url){
+		if(!filter_var($url, FILTER_VALIDATE_URL)) throw new Exception("Invalid parameter (URL required)");
+		if(!preg_match("/itunes.apple.com\/[a-z]{2}\/album\//", $url)) throw new Exception("Invalid parameter (iTunes URL required)");
+		
+		$path = parse_url($url, PHP_URL_PATH);
+		$matches = array();
+		if(preg_match("/\/[a-z]{2}\/album\/[a-z\-]*\/id([0-9]*)/", $path, $matches)){
+			if(isset($matches[1])) return $matches[1];
+		}
+		
+		throw new Exception("Invalid parameter (iTunes URL required)");
+	}
+	
+	/**
 	 * GET an iTunes artist ID from a URL
 	 * 
 	 * @param string $url The resource URL
@@ -190,15 +220,16 @@ class Itunes{
 	 * @return string|null
 	 */
 	private function getArtistIdFromUrl($url){
-		if(!filter_var($url, FILTER_VALIDATE_URL)) return null;
-		if(!preg_match("/itunes.apple.com\/[a-z]{2}\/artist\//", $url)) return null;
+		if(!filter_var($url, FILTER_VALIDATE_URL)) throw new Exception("Invalid parameter (URL required)");
+		if(!preg_match("/itunes.apple.com\/[a-z]{2}\/artist\//", $url)) throw new Exception("Invalid parameter (iTunes URL required)");
 		
 		$path = parse_url($url, PHP_URL_PATH);
 		$matches = array();
 		if(preg_match("/\/[a-z]{2}\/artist\/[a-z\-]*\/id([0-9]*)/", $path, $matches)){
 			if(isset($matches[1])) return $matches[1];
 		}
-		return null;
+		
+		throw new Exception("Invalid parameter (iTunes URL required)");
 	}
 	
 	/**

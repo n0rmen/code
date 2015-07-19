@@ -27,8 +27,25 @@ class Soundcloud{
 	 * @throw Exception
 	 */
 	function __construct($params=array()){
-		if(empty($params['client_id'])) throw Exception("Missing client ID");
+		if(empty($params['client_id'])) throw new Exception("Missing client ID");
 		$this->api_key = $params['client_id'];
+	}
+	
+	/**
+	 * Resolve a Soundcloud URL
+	 * @link https://developers.soundcloud.com/docs/api/reference#resolve
+	 * 
+	 * @param string $url URL of the resource
+	 * 
+	 * @return object
+	 * @throw Exception
+	 */
+	public function resolve($url){
+		if(!filter_var($url, FILTER_VALIDATE_URL) || strpos($url, "soundcloud.com") === false) throw new Exception("Invalid parameter (Soundcloud URL required)");
+		
+		$result = $this->get("https://api.soundcloud.com/resolve", array('url' => $url));
+		
+		return $result;
 	}
 	
 	/**
@@ -223,6 +240,10 @@ class Soundcloud{
 		$json = $this->_curl($url, "GET");
 		$result = json_decode($json);
 		
+		if(isset($result->errors) && sizeof($result->errors) > 0){
+			throw new Exception($result->errors[0]->error_message);
+		}
+		
 		return $result;
 	}
 	
@@ -241,6 +262,10 @@ class Soundcloud{
 		
 		$json =  $this->_curl($url, "POST", $params);
 		$result = json_decode($json);
+		
+		if(isset($result->errors) && sizeof($result->errors) > 0){
+			throw new Exception($result->errors[0]->error_message);
+		}
 		
 		return $result;
 	}

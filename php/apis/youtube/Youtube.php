@@ -27,8 +27,46 @@ class Youtube{
 	 * @throw Exception
 	 */
 	function __construct($params=array()){
-		if(empty($params['api_key'])) throw Exception("Missing API key");
+		if(empty($params['api_key'])) throw new Exception("Missing API key");
 		$this->api_key = $params['api_key'];
+	}
+	
+	/**
+	 * Resolve a Youtube URL
+	 * @link https://developers.google.com/youtube/v3/docs
+	 * 
+	 * @param string $url URL of the resource
+	 * 
+	 * @return object
+	 * @throw Exception
+	 */
+	public function resolve($url){
+		if(!filter_var($url, FILTER_VALIDATE_URL) || (strpos($url, "youtube.com") === false && strpos($url, "youtu.be") === false)) throw new Exception("Invalid parameter (Youtube URL required)");
+		
+		$parse_url = parse_url($url);
+		$host = $parse_url['host'];
+		$path = $parse_url['path'];
+		
+		if(preg_match("/^\/channel/", $path)){
+			$resourceId = substr($path, 9);
+			$result = $this->getChannel($resourceId);
+		}
+		else if(preg_match("/^\/embed/", $path)){
+			$resourceId = substr($path, 7);
+			$result = $this->getVideo($resourceId);
+		}
+		else if(preg_match("/youtu.be/", $host)){
+			$resourceId = substr($path, 1);
+			$result = $this->getVideo($resourceId);
+		}
+		else{
+			$query = $parse_url['query'];
+			parse_str($query, $params);
+			$resourceId = $params['v'];
+			$result = $this->getVideo($resourceId);
+		}
+		
+		return $result;
 	}
 	
 	/**
