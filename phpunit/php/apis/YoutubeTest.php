@@ -11,6 +11,20 @@ class YoutubeTest extends PHPUnit_Framework_TestCase{
 		$this->api = new Youtube(array('api_key' => GOOGLE_API_KEY));
 	}
 	
+	public function test_resolve(){
+		$results = $this->api->resolve("https://www.youtube.com/watch?v=GN-_rbIV0jc");
+		
+		$this->assertEquals("GN-_rbIV0jc", $results->id);
+		$this->assertEquals("youtube#video", $results->kind);
+	}
+	
+	/**
+	 * @expectedException Exception
+	 */
+	public function test_resolve_InvalidUrl(){
+		$results = $this->api->resolve("http://www.google.fr");
+	}
+	
 	public function test_getVideo(){
 		$results = $this->api->getVideo("GN-_rbIV0jc");
 		
@@ -36,7 +50,7 @@ class YoutubeTest extends PHPUnit_Framework_TestCase{
 	 * @expectedException Exception
 	 */
 	public function test_getVideo_InvalidUrl(){
-		$results = $this->api->getVideo("https://itunes.apple.com/us/album/in-between-dreams/id879273552");
+		$results = $this->api->getVideo("http://www.google.fr");
 	}
 	
 	public function test_searchVideos(){

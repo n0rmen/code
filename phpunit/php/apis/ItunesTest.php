@@ -9,6 +9,27 @@ class ItunesTest extends PHPUnit_Framework_TestCase{
 		$this->api = new Itunes();
 	}
 	
+	public function test_resolve_Album(){
+		$results = $this->api->resolve("https://itunes.apple.com/us/album/in-between-dreams/id879273552");
+		
+		$this->assertEquals(879273552, $results->collectionId);
+		$this->assertEquals("collection", $results->wrapperType);
+	}
+	
+	public function test_resolve_Artist(){
+		$results = $this->api->resolve("https://itunes.apple.com/us/artist/jack-johnson/id909253");
+		
+		$this->assertEquals(909253, $results->artistId);
+		$this->assertEquals("artist", $results->wrapperType);
+	}
+	
+	/**
+	 * @expectedException Exception
+	 */
+	public function test_resolve_InvalidUrl(){
+		$results = $this->api->resolve("http://www.google.fr");
+	}
+	
 	public function test_getTrack(){
 		$results = $this->api->getTrack(879273565);
 		
@@ -56,7 +77,7 @@ class ItunesTest extends PHPUnit_Framework_TestCase{
 	 * @expectedException Exception
 	 */
 	public function test_getAlbum_InvalidUrl(){
-		$results = $this->api->getAlbum("https://itunes.apple.com/us/artist/jack-johnson/id909253");
+		$results = $this->api->getAlbum("http://www.google.fr");
 		
 		$this->assertNull($results);
 	}
@@ -86,11 +107,25 @@ class ItunesTest extends PHPUnit_Framework_TestCase{
 		$this->assertEquals("artist", $results->wrapperType);
 	}
 	
+	public function test_getArtist_FromUrl(){
+		$results = $this->api->getArtist("https://itunes.apple.com/us/artist/jack-johnson/id909253");
+		
+		$this->assertEquals(909253, $results->artistId);
+		$this->assertEquals("artist", $results->wrapperType);
+	}
+	
 	/**
 	 * @expectedException Exception
 	 */
 	public function test_getArtist_InvalidId(){
 		$results = $this->api->getArtist(879273552);
+	}
+	
+	/**
+	 * @expectedException Exception
+	 */
+	public function test_getArtist_InvalidUrl(){
+		$results = $this->api->getArtist("http://www.google.fr");
 	}
 	
 	public function test_getArtistAlbums(){
