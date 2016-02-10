@@ -49,3 +49,18 @@ Options -Indexes
 	require group administrators
 	satisfy any
 </FilesMatch>
+
+# Redirect all request to index.php
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ index.php/$1 [QSA,L]
+</IfModule>
+
+# CORS
+<IfModule mod_headers.c>
+	Header set Access-Control-Allow-Origin "*"
+	Header set Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+	Header set Access-Control-Allow-Credentials "true"
+	Header set Access-Control-Allow-Headers "Authorization,DNT,User-Agent,Keep-Alive,Content-Type,accept,origin,X-Requested-With"
+</IfModule>
